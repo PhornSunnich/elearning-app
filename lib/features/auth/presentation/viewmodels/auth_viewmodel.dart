@@ -5,11 +5,12 @@ import '../../../../core/errors/app_exception.dart';
 import '../../data/repositories/fake_auth_repository.dart';
 import '../../domain/entities/app_user.dart';
 import '../../domain/repositories/auth_repository.dart';
+import '../../data/datasources/auth_local_datasource.dart';
 
 /// Dependency injection: the ONE place that decides which implementation
 /// is used. Phase 3 changes this line to the real API repository.
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  return FakeAuthRepository();
+  return FakeAuthRepository(ref.read(authLocalDataSourceProvider));
 });
 
 enum AuthStatus { initial, loading, success, failure }
@@ -79,10 +80,23 @@ class AuthViewModel extends Notifier<AuthState> {
     }
   }
 
+    /// Called once in main() before the first screen.
+  Future<void> restoreSession() async {
+    try {
+      final user = await _repo.restoreSession();
+      if (user != null) {
+        state = AuthState(status: AuthStatus.success, user: user);
+      }
+    } catch (_) {
+      // Storage unavailable: start logged out instead of crashing.
+    }
+  }
+
   Future<void> logout() async {
     await _repo.logout();
     state = const AuthState(); // back to initial
   }
+
 }
 
 final authViewModelProvider =
