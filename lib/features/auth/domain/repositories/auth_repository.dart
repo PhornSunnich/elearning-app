@@ -12,8 +12,9 @@ abstract class AuthRepository {
 
   Future<void> logout();
 
-  /// Sends a reset code to the email (always succeeds, so the app never
-  /// reveals which emails have accounts).
+  /// The user saved on this device, or null if nobody is logged in.
+  Future<AppUser?> restoreSession();
+
   Future<void> requestPasswordReset(String email);
 
   Future<void> resetPassword({

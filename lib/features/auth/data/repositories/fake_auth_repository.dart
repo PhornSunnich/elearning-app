@@ -1,10 +1,17 @@
 import '../../../../core/errors/app_exception.dart';
 import '../../domain/entities/app_user.dart';
 import '../../domain/repositories/auth_repository.dart';
+import '../datasources/auth_local_datasource.dart';
 
 /// In-memory stand-in for the backend. Demo account:
 ///   student@demo.com / Password1
+/// Accounts live in memory (lost on refresh), but the SESSION is saved
+/// on the device, like a real app.
 class FakeAuthRepository implements AuthRepository {
+  FakeAuthRepository(this._local);
+
+  final AuthLocalDataSource _local;
+
   final Map<String, _Account> _accounts = {
     'student@demo.com': _Account(
       user: const AppUser(
@@ -20,6 +27,12 @@ class FakeAuthRepository implements AuthRepository {
   Future<void> _fakeNetworkDelay() =>
       Future.delayed(const Duration(milliseconds: 800));
 
+  Future<void> _saveSession(AppUser user) => _local.saveSession(
+        user: user,
+        accessToken: 'fake-access-${user.id}',
+        refreshToken: 'fake-refresh-${user.id}',
+      );
+
   @override
   Future<AppUser> login({
     required String email,
@@ -30,6 +43,7 @@ class FakeAuthRepository implements AuthRepository {
     if (account == null || account.password != password) {
       throw const AppException('Invalid email or password');
     }
+    await _saveSession(account.user);
     return account.user;
   }
 
@@ -52,15 +66,19 @@ class FakeAuthRepository implements AuthRepository {
       role: role,
     );
     _accounts[key] = _Account(user: user, password: password);
+    await _saveSession(user);
     return user;
   }
 
   @override
   Future<void> logout() async {
-    await Future.delayed(const Duration(milliseconds: 200));
+    await _local.clear();
   }
 
-    @override
+  @override
+  Future<AppUser?> restoreSession() => _local.readUser();
+
+  @override
   Future<void> requestPasswordReset(String email) async {
     await _fakeNetworkDelay();
     // Real backend: emails a code. Fake: the code is always 123456.
@@ -87,5 +105,5 @@ class FakeAuthRepository implements AuthRepository {
 class _Account {
   _Account({required this.user, required this.password});
   final AppUser user;
-  String password; // not final: reset changes it
+  String password;
 }
