@@ -13,10 +13,53 @@ import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/courses/presentation/screens/course_details_screen.dart';
 import '../widgets/main_shell.dart';
 import 'app_routes.dart';
+import 'package:flutter/foundation.dart';
+import '../../features/auth/presentation/screens/forgot_password_screen.dart';
+import '../../features/auth/presentation/screens/reset_password_screen.dart';
+import '../../features/auth/presentation/viewmodels/auth_viewmodel.dart';
+
+
+  /// GoRouter re-runs `redirect` whenever this notifies.
+class _RouterRefresh extends ChangeNotifier {
+  void refresh() => notifyListeners();
+}
+
+const _publicRoutes = {
+  AppRoutes.splash,
+  AppRoutes.onboarding,
+  AppRoutes.login,
+  AppRoutes.register,
+  AppRoutes.forgotPassword,
+  AppRoutes.resetPassword,
+};
+
+// Logged-in users have no reason to see these.
+const _guestOnlyRoutes = {
+  AppRoutes.onboarding,
+  AppRoutes.login,
+  AppRoutes.register,
+};
 
 final routerProvider = Provider<GoRouter>((ref) {
+  final refresh = _RouterRefresh();
+  ref.listen(authViewModelProvider, (_, _) => refresh.refresh());
+  ref.onDispose(refresh.dispose);
+
   return GoRouter(
     initialLocation: AppRoutes.splash,
+    refreshListenable: refresh,
+    redirect: (context, state) {
+      final loggedIn = ref.read(authViewModelProvider).user != null;
+      final location = state.matchedLocation;
+
+      if (!loggedIn && !_publicRoutes.contains(location)) {
+        return AppRoutes.login;
+      }
+      if (loggedIn && _guestOnlyRoutes.contains(location)) {
+        return AppRoutes.home;
+      }
+      return null; // no redirect
+    },
     routes: [
       // Screens WITHOUT the bottom bar
       GoRoute(
@@ -34,6 +77,16 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.register,
         builder: (context, state) => const RegisterScreen(),
+      ),
+            GoRoute(
+        path: AppRoutes.forgotPassword,
+        builder: (context, state) => const ForgotPasswordScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.resetPassword,
+        builder: (context, state) => ResetPasswordScreen(
+          email: state.uri.queryParameters['email'] ?? '',
+        ),
       ),
 
       // Screens WITH the bottom bar: one branch per tab
