@@ -10,6 +10,7 @@ import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/my_learning/presentation/screens/my_learning_screen.dart';
 import '../../features/notifications/presentation/screens/notifications_screen.dart';
 import '../../features/profile/presentation/screens/profile_screen.dart';
+import '../../features/courses/presentation/screens/course_details_screen.dart';
 import '../widgets/main_shell.dart';
 import 'app_routes.dart';
 
@@ -46,10 +47,18 @@ final routerProvider = Provider<GoRouter>((ref) {
               builder: (context, state) => const HomeScreen(),
             ),
           ]),
-          StatefulShellBranch(routes: [
+                    StatefulShellBranch(routes: [
             GoRoute(
               path: AppRoutes.explore,
               builder: (context, state) => const ExploreScreen(),
+              routes: [
+                GoRoute(
+                  path: 'course/:id',
+                  builder: (context, state) => CourseDetailsScreen(
+                    courseId: state.pathParameters['id']!,
+                  ),
+                ),
+              ],
             ),
           ]),
           StatefulShellBranch(routes: [

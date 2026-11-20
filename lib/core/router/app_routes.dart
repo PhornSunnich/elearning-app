@@ -12,4 +12,7 @@ class AppRoutes {
   static const myLearning = '/my-learning';
   static const notifications = '/notifications';
   static const profile = '/profile';
+
+  static String courseDetails(String id) => '/explore/course/$id';
+  
 }

@@ -7,6 +7,8 @@ import '../../../../core/widgets/error_view.dart';
 import '../../../../core/widgets/loading_view.dart';
 import '../viewmodels/courses_viewmodel.dart';
 import '../widgets/course_card.dart';
+import 'package:go_router/go_router.dart';
+import '../../../../core/router/app_routes.dart';
 
 class ExploreScreen extends ConsumerWidget {
   const ExploreScreen({super.key});
@@ -40,7 +42,10 @@ class ExploreScreen extends ConsumerWidget {
               padding: const EdgeInsets.all(16),
               itemCount: list.length,
               separatorBuilder: (_, _) => const SizedBox(height: 12),
-              itemBuilder: (context, i) => CourseCard(course: list[i]),
+              itemBuilder: (context, i) => CourseCard(
+                course: list[i],
+                onTap: () => context.push(AppRoutes.courseDetails(list[i].id)),
+              ),
             ),
           );
         },
