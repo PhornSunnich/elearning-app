@@ -1,6 +1,7 @@
 import '../../../../core/errors/app_exception.dart';
 import '../../domain/entities/course.dart';
 import '../../domain/repositories/course_repository.dart';
+import '../../domain/entities/course_content.dart';
 
 /// Hard-coded data. Phase 3 replaces this with a Dio-based repository.
 class FakeCourseRepository implements CourseRepository {
@@ -81,6 +82,47 @@ class FakeCourseRepository implements CourseRepository {
     return _courses.firstWhere(
       (c) => c.id == id,
       orElse: () => throw const AppException('Course not found'),
+    );
+  }
+
+    @override
+  Future<CourseContent> getContent(String courseId) async {
+    await _delay();
+    // Same mock content for every course. Phase 3 loads the real one.
+    return const CourseContent(
+      objectives: [
+        'Understand the core concepts from the ground up',
+        'Build a small real-world project',
+        'Apply best practices used by professionals',
+      ],
+      requirements: [
+        'A computer with internet access',
+        'Basic programming knowledge helps, but is not required',
+      ],
+      modules: [
+        CourseModule(title: 'Module 1: Getting started', lessons: [
+          Lesson(
+              id: 'l1',
+              title: 'Welcome and course overview',
+              durationMinutes: 4,
+              isPreview: true),
+          Lesson(
+              id: 'l2',
+              title: 'Setting up your tools',
+              durationMinutes: 12,
+              isPreview: true),
+          Lesson(id: 'l3', title: 'Your first example', durationMinutes: 18),
+        ]),
+        CourseModule(title: 'Module 2: Core concepts', lessons: [
+          Lesson(id: 'l4', title: 'The building blocks', durationMinutes: 20),
+          Lesson(id: 'l5', title: 'Working with data', durationMinutes: 25),
+          Lesson(id: 'l6', title: 'Putting it together', durationMinutes: 22),
+        ]),
+        CourseModule(title: 'Module 3: Final project', lessons: [
+          Lesson(id: 'l7', title: 'Project planning', durationMinutes: 15),
+          Lesson(id: 'l8', title: 'Building the project', durationMinutes: 40),
+        ]),
+      ],
     );
   }
 }
