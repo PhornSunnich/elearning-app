@@ -15,12 +15,16 @@ class TokenStorage {
   static const _accessKey = 'access_token';
   static const _refreshKey = 'refresh_token';
 
-  Future<void> save({
+    Future<void> save({
     required String accessToken,
-    required String refreshToken,
+    String? refreshToken,
   }) async {
     await _storage.write(key: _accessKey, value: accessToken);
-    await _storage.write(key: _refreshKey, value: refreshToken);
+    if (refreshToken == null) {
+      await _storage.delete(key: _refreshKey);
+    } else {
+      await _storage.write(key: _refreshKey, value: refreshToken);
+    }
   }
 
   Future<String?> readAccessToken() => _storage.read(key: _accessKey);
