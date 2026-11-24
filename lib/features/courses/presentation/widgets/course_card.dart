@@ -8,16 +8,18 @@ class CourseCard extends StatelessWidget {
   final Course course;
   final VoidCallback? onTap;
 
-  String get _levelLabel => switch (course.level) {
+  String? get _levelLabel => switch (course.level) {
         CourseLevel.beginner => 'Beginner',
         CourseLevel.intermediate => 'Intermediate',
         CourseLevel.advanced => 'Advanced',
+        null => null,
       };
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
+    final small = theme.textTheme.bodySmall;
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -42,6 +44,12 @@ class CourseCard extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
+                    if (course.category.isNotEmpty)
+                      Text(
+                        course.category,
+                        style: small?.copyWith(
+                            color: scheme.primary, fontWeight: FontWeight.w600),
+                      ),
                     Text(
                       course.title,
                       maxLines: 2,
@@ -50,30 +58,40 @@ class CourseCard extends StatelessWidget {
                           ?.copyWith(fontWeight: FontWeight.w700),
                     ),
                     const SizedBox(height: 2),
-                    Text(
-                      course.instructor,
-                      style: theme.textTheme.bodySmall
-                          ?.copyWith(color: scheme.outline),
-                    ),
+                    Text(course.instructor,
+                        style: small?.copyWith(color: scheme.outline)),
                     const SizedBox(height: 6),
-                    Row(
+                    Wrap(
+                      spacing: 12,
+                      runSpacing: 4,
+                      crossAxisAlignment: WrapCrossAlignment.center,
                       children: [
-                        const Icon(Icons.star_rounded,
-                            size: 16, color: Color(0xFFF59E0B)),
-                        const SizedBox(width: 2),
-                        Text(course.rating.toStringAsFixed(1),
-                            style: theme.textTheme.bodySmall),
-                        const SizedBox(width: 10),
-                        Icon(Icons.schedule, size: 14, color: scheme.outline),
-                        const SizedBox(width: 2),
-                        Text('${course.durationHours}h',
-                            style: theme.textTheme.bodySmall),
-                        const SizedBox(width: 10),
-                        Flexible(
-                          child: Text(_levelLabel,
-                              overflow: TextOverflow.ellipsis,
-                              style: theme.textTheme.bodySmall),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.star_rounded,
+                                size: 16, color: Color(0xFFF59E0B)),
+                            const SizedBox(width: 2),
+                            Text(
+                              course.hasRating
+                                  ? '${course.rating.toStringAsFixed(1)} (${course.reviewCount})'
+                                  : 'New',
+                              style: small,
+                            ),
+                          ],
                         ),
+                        Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(Icons.menu_book_outlined,
+                                size: 14, color: scheme.outline),
+                            const SizedBox(width: 2),
+                            Text('${course.lessonCount} lessons', style: small),
+                          ],
+                        ),
+                        if (course.durationHours != null)
+                          Text('${course.durationHours}h', style: small),
+                        if (_levelLabel != null) Text(_levelLabel!, style: small),
                       ],
                     ),
                     const SizedBox(height: 6),
