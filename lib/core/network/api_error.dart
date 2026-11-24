@@ -37,6 +37,15 @@ AppException mapDioError(DioException e, {String? unauthorizedMessage}) {
   }
 }
 
+/// Runs [run]; converts any DioException into a user-friendly AppException.
+Future<T> guardApi<T>(Future<T> Function() run) async {
+  try {
+    return await run();
+  } on DioException catch (e) {
+    throw mapDioError(e);
+  }
+}
+
 String? _messageFromBody(Object? data) {
   if (data is Map && data['message'] is String) {
     final m = (data['message'] as String).trim();

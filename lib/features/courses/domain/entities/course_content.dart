@@ -4,17 +4,21 @@ class Lesson extends Equatable {
   const Lesson({
     required this.id,
     required this.title,
-    required this.durationMinutes,
+    this.durationMinutes,
     this.isPreview = false,
+    this.videoUrl,
+    this.content,
   });
 
   final String id;
   final String title;
-  final int durationMinutes;
+  final int? durationMinutes;
   final bool isPreview; // previewable without enrolling
+  final String? videoUrl;
+  final String? content;
 
   @override
-  List<Object?> get props => [id, title, durationMinutes, isPreview];
+  List<Object?> get props => [id, title, durationMinutes, isPreview, videoUrl];
 }
 
 class CourseModule extends Equatable {
