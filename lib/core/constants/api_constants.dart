@@ -9,8 +9,8 @@ class ApiConstants {
   );
 
   // Render's free plan sleeps; the first request can take up to a minute.
-  static const connectTimeout = Duration(seconds: 60);
-  static const receiveTimeout = Duration(seconds: 60);
+  static const connectTimeout = Duration(seconds: 120);
+  static const receiveTimeout = Duration(seconds: 120);
 
   static const login = '/api/auth/login';
   static const register = '/api/auth/register';
