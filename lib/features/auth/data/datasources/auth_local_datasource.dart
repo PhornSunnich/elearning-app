@@ -16,10 +16,13 @@ class AuthLocalDataSource {
 
   static const _userKey = 'cached_user';
 
+    Future<void> saveToken(String accessToken) =>
+      _tokens.save(accessToken: accessToken);
+
   Future<void> saveSession({
     required AppUser user,
     required String accessToken,
-    required String refreshToken,
+    String? refreshToken,
   }) async {
     await _tokens.save(accessToken: accessToken, refreshToken: refreshToken);
     await _storage.write(
