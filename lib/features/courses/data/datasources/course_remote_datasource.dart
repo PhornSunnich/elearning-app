@@ -13,20 +13,20 @@ class CourseRemoteDataSource {
     required int page,
     required int size,
   }) async {
-    final res = await _dio.get<Map<String, dynamic>>(
+    final res = await _dio.get(
       '/api/courses',
       queryParameters: {
         'page': page,
         'size': size,
         if (search != null && search.isNotEmpty) 'search': search,
-        if (categoryId != null) 'categoryId': categoryId,
+        ?categoryId: categoryId,
       },
     );
     return PagedCoursesModel.fromJson(res.data!);
   }
 
   Future<CourseModel> getCourse(String id) async {
-    final res = await _dio.get<Map<String, dynamic>>('/api/courses/$id');
+    final res = await _dio.get('/api/courses/$id');
     return CourseModel.fromJson(res.data!);
   }
 
