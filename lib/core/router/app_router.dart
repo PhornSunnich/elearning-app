@@ -13,13 +13,15 @@ import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/courses/presentation/screens/course_details_screen.dart';
 import '../widgets/main_shell.dart';
 import 'app_routes.dart';
+
 import 'package:flutter/foundation.dart';
+
 import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/reset_password_screen.dart';
 import '../../features/auth/presentation/viewmodels/auth_viewmodel.dart';
+import '../../features/lesson_player/presentation/screens/lesson_player_screen.dart';
 
-
-  /// GoRouter re-runs `redirect` whenever this notifies.
+/// GoRouter re-runs `redirect` whenever this notifies.
 class _RouterRefresh extends ChangeNotifier {
   void refresh() => notifyListeners();
 }
@@ -78,7 +80,7 @@ final routerProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.register,
         builder: (context, state) => const RegisterScreen(),
       ),
-            GoRoute(
+      GoRoute(
         path: AppRoutes.forgotPassword,
         builder: (context, state) => const ForgotPasswordScreen(),
       ),
@@ -94,44 +96,63 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state, navigationShell) =>
             MainShell(navigationShell: navigationShell),
         branches: [
-          StatefulShellBranch(routes: [
-            GoRoute(
-              path: AppRoutes.home,
-              builder: (context, state) => const HomeScreen(),
-            ),
-          ]),
-                    StatefulShellBranch(routes: [
-            GoRoute(
-              path: AppRoutes.explore,
-              builder: (context, state) => const ExploreScreen(),
-              routes: [
-                GoRoute(
-                  path: 'course/:id',
-                  builder: (context, state) => CourseDetailsScreen(
-                    courseId: state.pathParameters['id']!,
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.home,
+                builder: (context, state) => const HomeScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.explore,
+                builder: (context, state) => const ExploreScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'course/:id',
+                    builder: (context, state) => CourseDetailsScreen(
+                      courseId: state.pathParameters['id']!,
+                    ),
+                    routes: [
+                      GoRoute(
+                        path: 'lesson/:lessonId',
+                        builder: (context, state) => LessonPlayerScreen(
+                          courseId: state.pathParameters['id']!,
+                          lessonId: state.pathParameters['lessonId']!,
+                        ),
+                      ),
+                    ],
                   ),
-                ),
-              ],
-            ),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(
-              path: AppRoutes.myLearning,
-              builder: (context, state) => const MyLearningScreen(),
-            ),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(
-              path: AppRoutes.notifications,
-              builder: (context, state) => const NotificationsScreen(),
-            ),
-          ]),
-          StatefulShellBranch(routes: [
-            GoRoute(
-              path: AppRoutes.profile,
-              builder: (context, state) => const ProfileScreen(),
-            ),
-          ]),
+                ],
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.myLearning,
+                builder: (context, state) => const MyLearningScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.notifications,
+                builder: (context, state) => const NotificationsScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.profile,
+                builder: (context, state) => const ProfileScreen(),
+              ),
+            ],
+          ),
         ],
       ),
     ],
