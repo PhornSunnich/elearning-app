@@ -18,5 +18,9 @@ class AppRoutes {
   static String courseDetails(String id) => '/explore/course/$id';
 
   static String resetPasswordFor(String email) =>
-      Uri(path: resetPassword, queryParameters: {'email': email}).toString();
+    Uri(path: resetPassword, queryParameters: {'email': email}).toString();
+
+  static String lesson(String courseId, String lessonId) =>
+      '/explore/course/$courseId/lesson/$lessonId';
+  
 }
