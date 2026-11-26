@@ -8,6 +8,7 @@ import '../../../../core/widgets/loading_view.dart';
 import '../../domain/entities/course.dart';
 import '../../domain/entities/course_content.dart';
 import '../viewmodels/course_details_viewmodel.dart';
+import '../viewmodels/enrollment_viewmodel.dart';
 
 class CourseDetailsScreen extends ConsumerStatefulWidget {
   const CourseDetailsScreen({super.key, required this.courseId});
@@ -22,21 +23,32 @@ class CourseDetailsScreen extends ConsumerStatefulWidget {
 class _CourseDetailsScreenState extends ConsumerState<CourseDetailsScreen> {
   bool _enrolling = false;
 
-  Future<void> _enroll() async {
+    Future<void> _enroll() async {
     setState(() => _enrolling = true);
-    await ref.read(enrollmentProvider.notifier).enroll(widget.courseId);
-    if (!mounted) return;
-    setState(() => _enrolling = false);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Enrolled! Find it in My Learning.')),
-    );
+    try {
+      await ref.read(enrollmentsProvider.notifier).enroll(widget.courseId);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Enrolled! Find it in My Learning.')),
+      );
+    } on AppException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.message)));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not enroll. Please try again.')),
+      );
+    } finally {
+      if (mounted) setState(() => _enrolling = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final courseAsync = ref.watch(courseDetailsProvider(widget.courseId));
-    final enrolled =
-        ref.watch(enrollmentProvider).contains(widget.courseId);
+    final enrolled = ref.watch(enrolledCourseIdsProvider).contains(widget.courseId);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Course details')),
@@ -83,7 +95,7 @@ class _Body extends ConsumerWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final content = ref.watch(courseContentProvider(course.id));
-    final enrolled = ref.watch(enrollmentProvider).contains(course.id);
+    final enrolled = ref.watch(enrolledCourseIdsProvider).contains(course.id);
 
     return ListView(
       padding: const EdgeInsets.all(16),

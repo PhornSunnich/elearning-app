@@ -15,19 +15,3 @@ final courseContentProvider =
   return ref.read(courseRepositoryProvider).getContent(id);
 });
 
-/// Fake enrollment: remembers enrolled course ids in memory.
-/// visal's My Learning screen will read this (then the real API).
-class EnrollmentViewModel extends Notifier<Set<String>> {
-  @override
-  Set<String> build() => {};
-
-  Future<void> enroll(String courseId) async {
-    await Future.delayed(const Duration(milliseconds: 700));
-    state = {...state, courseId}; // new Set, so listeners are notified
-  }
-}
-
-final enrollmentProvider =
-    NotifierProvider<EnrollmentViewModel, Set<String>>(
-  EnrollmentViewModel.new,
-);
