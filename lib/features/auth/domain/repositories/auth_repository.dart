@@ -22,4 +22,6 @@ abstract class AuthRepository {
     required String code,
     required String newPassword,
   });
+
+  Future<void> updateCachedUser(AppUser user);
 }

@@ -107,6 +107,12 @@ class AuthViewModel extends Notifier<AuthState> {
     }
   }
 
+    /// Called after a profile edit, so the whole app shows the new name.
+  Future<void> updateUser(AppUser user) async {
+    await _repo.updateCachedUser(user);
+    state = AuthState(status: AuthStatus.success, user: user);
+  }
+
   Future<void> logout() async {
     await _repo.logout();
     state = const AuthState(); // back to initial

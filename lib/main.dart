@@ -11,6 +11,8 @@ import 'features/auth/presentation/viewmodels/auth_viewmodel.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Hive.initFlutter();
+  await Hive.initFlutter();
+  await Hive.openBox<String>('settings');
 
   final container = ProviderContainer();
 

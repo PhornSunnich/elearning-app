@@ -16,8 +16,14 @@ class AuthLocalDataSource {
 
   static const _userKey = 'cached_user';
 
-    Future<void> saveToken(String accessToken) =>
+  Future<void> saveToken(String accessToken) =>
       _tokens.save(accessToken: accessToken);
+
+    /// Updates only the cached user (after a profile edit); tokens are kept.
+  Future<void> saveUser(AppUser user) => _storage.write(
+        key: _userKey,
+        value: jsonEncode(UserModel.fromEntity(user).toJson()),
+      );
 
   Future<void> saveSession({
     required AppUser user,

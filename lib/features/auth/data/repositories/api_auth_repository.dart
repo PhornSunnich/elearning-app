@@ -127,4 +127,9 @@ class ApiAuthRepository implements AuthRepository {
   }) async {
     throw const AppException('Password reset is not available yet.');
   }
+
+  @override
+  Future<void> updateCachedUser(AppUser user) => _local.saveUser(user);
+
+  
 }
