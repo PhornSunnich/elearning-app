@@ -21,12 +21,12 @@ class ProfileRemoteDataSource {
   }) async {
     final res = await _dio.put<Map<String, dynamic>>(
       '/api/students/me',
-      data: {
+            data: {
         'name': name,
-        if (age != null) 'age': age,
-        if (major != null) 'major': major,
-        if (currentPassword != null) 'currentPassword': currentPassword,
-        if (newPassword != null) 'newPassword': newPassword,
+        'age': ?age,
+        'major': ?major,
+        'currentPassword': ?currentPassword,
+        'newPassword': ?newPassword,
       },
     );
     return ProfileModel.fromJson(res.data!);
