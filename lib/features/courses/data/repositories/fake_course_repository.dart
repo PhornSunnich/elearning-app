@@ -2,6 +2,8 @@ import '../../../../core/errors/app_exception.dart';
 import '../../domain/entities/course.dart';
 import '../../domain/repositories/course_repository.dart';
 import '../../domain/entities/course_content.dart';
+import '../../domain/entities/course_category.dart';
+import '../../domain/entities/course_page.dart';
 
 /// Hard-coded data. Phase 3 replaces this with a Dio-based repository.
 class FakeCourseRepository implements CourseRepository {
@@ -70,10 +72,30 @@ class FakeCourseRepository implements CourseRepository {
 
   Future<void> _delay() => Future.delayed(const Duration(milliseconds: 900));
 
-  @override
-  Future<List<Course>> getCourses() async {
+    @override
+  Future<CoursePage> getCourses({
+    String? search,
+    String? categoryId,
+    int page = 0,
+    int size = 10,
+  }) async {
     await _delay();
-    return _courses;
+    final q = (search ?? '').trim().toLowerCase();
+    final items = _courses
+        .where((c) => q.isEmpty || c.title.toLowerCase().contains(q))
+        .toList();
+    return CoursePage(items: items, page: 0, isLast: true);
+  }
+
+  @override
+  Future<List<CourseCategory>> getCategories() async {
+    await _delay();
+    return const [
+      CourseCategory(id: 'Mobile', name: 'Mobile'),
+      CourseCategory(id: 'Database', name: 'Database'),
+      CourseCategory(id: 'Backend', name: 'Backend'),
+      CourseCategory(id: 'Design', name: 'Design'),
+    ];
   }
 
   @override

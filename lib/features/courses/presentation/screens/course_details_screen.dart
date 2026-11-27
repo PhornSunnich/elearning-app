@@ -1,13 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:material_ui/material_ui.dart';
 
 import '../../../../core/errors/app_exception.dart';
+import '../../../../core/router/app_routes.dart';
 import '../../../../core/widgets/app_primary_button.dart';
 import '../../../../core/widgets/error_view.dart';
 import '../../../../core/widgets/loading_view.dart';
 import '../../domain/entities/course.dart';
 import '../../domain/entities/course_content.dart';
 import '../viewmodels/course_details_viewmodel.dart';
+import '../viewmodels/enrollment_viewmodel.dart';
+import '../widgets/reviews_section.dart';
+
+String _lessonsLabel(int n) => '$n ${n == 1 ? 'lesson' : 'lessons'}';
 
 class CourseDetailsScreen extends ConsumerStatefulWidget {
   const CourseDetailsScreen({super.key, required this.courseId});
@@ -24,19 +30,31 @@ class _CourseDetailsScreenState extends ConsumerState<CourseDetailsScreen> {
 
   Future<void> _enroll() async {
     setState(() => _enrolling = true);
-    await ref.read(enrollmentProvider.notifier).enroll(widget.courseId);
-    if (!mounted) return;
-    setState(() => _enrolling = false);
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Enrolled! Find it in My Learning.')),
-    );
+    try {
+      await ref.read(enrollmentsProvider.notifier).enroll(widget.courseId);
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Enrolled! Find it in My Learning.')),
+      );
+    } on AppException catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text(e.message)));
+    } catch (_) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Could not enroll. Please try again.')),
+      );
+    } finally {
+      if (mounted) setState(() => _enrolling = false);
+    }
   }
 
   @override
   Widget build(BuildContext context) {
     final courseAsync = ref.watch(courseDetailsProvider(widget.courseId));
     final enrolled =
-        ref.watch(enrollmentProvider).contains(widget.courseId);
+        ref.watch(enrolledCourseIdsProvider).contains(widget.courseId);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Course details')),
@@ -83,6 +101,7 @@ class _Body extends ConsumerWidget {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     final content = ref.watch(courseContentProvider(course.id));
+    final enrolled = ref.watch(enrolledCourseIdsProvider).contains(course.id);
 
     return ListView(
       padding: const EdgeInsets.all(16),
@@ -97,22 +116,32 @@ class _Body extends ConsumerWidget {
               size: 64, color: scheme.primary),
         ),
         const SizedBox(height: 16),
-        Text(course.title,
-            style: theme.textTheme.titleLarge
-                ?.copyWith(fontWeight: FontWeight.w700)),
+        Text(
+          course.title,
+          style: theme.textTheme.titleLarge
+              ?.copyWith(fontWeight: FontWeight.w700),
+        ),
         const SizedBox(height: 4),
-        Text('By ${course.instructor}',
-            style: theme.textTheme.bodyMedium
-                ?.copyWith(color: scheme.outline)),
+        Text(
+          'By ${course.instructor}',
+          style: theme.textTheme.bodyMedium?.copyWith(color: scheme.outline),
+        ),
         const SizedBox(height: 12),
         Wrap(
           spacing: 16,
           runSpacing: 8,
           children: [
-            _Stat(Icons.star_rounded, course.rating.toStringAsFixed(1)),
-            _Stat(Icons.schedule, '${course.durationHours}h'),
-            _Stat(Icons.menu_book_outlined, '${course.lessonCount} lessons'),
-            _Stat(Icons.category_outlined, course.category),
+            _Stat(
+              Icons.star_rounded,
+              course.hasRating
+                  ? '${course.rating.toStringAsFixed(1)} (${course.reviewCount} reviews)'
+                  : 'No reviews yet',
+            ),
+            if (course.durationHours != null)
+              _Stat(Icons.schedule, '${course.durationHours}h'),
+            _Stat(Icons.menu_book_outlined, _lessonsLabel(course.lessonCount)),
+            if (course.category.isNotEmpty)
+              _Stat(Icons.category_outlined, course.category),
           ],
         ),
         const SizedBox(height: 20),
@@ -129,8 +158,15 @@ class _Body extends ConsumerWidget {
             message: 'Could not load curriculum.',
             onRetry: () => ref.invalidate(courseContentProvider(course.id)),
           ),
-          data: (c) => _Content(content: c),
+          data: (c) => _Content(
+            content: c,
+            enrolled: enrolled,
+            courseId: course.id,
+          ),
         ),
+        const SizedBox(height: 24),
+        ReviewsSection(courseId: course.id),
+        const SizedBox(height: 24),
       ],
     );
   }
@@ -160,9 +196,15 @@ class _Stat extends StatelessWidget {
 }
 
 class _Content extends StatelessWidget {
-  const _Content({required this.content});
+  const _Content({
+    required this.content,
+    required this.enrolled,
+    required this.courseId,
+  });
 
   final CourseContent content;
+  final bool enrolled;
+  final String courseId;
 
   @override
   Widget build(BuildContext context) {
@@ -190,50 +232,86 @@ class _Content extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text("What you'll learn", style: heading),
+        if (content.objectives.isNotEmpty) ...[
+          Text("What you'll learn", style: heading),
+          const SizedBox(height: 8),
+          bullets(content.objectives, Icons.check_circle_outline),
+          const SizedBox(height: 20),
+        ],
+        if (content.requirements.isNotEmpty) ...[
+          Text('Requirements', style: heading),
+          const SizedBox(height: 8),
+          bullets(content.requirements, Icons.arrow_right_alt),
+          const SizedBox(height: 20),
+        ],
+        Text('Curriculum · ${_lessonsLabel(content.lessonCount)}',
+            style: heading),
         const SizedBox(height: 8),
-        bullets(content.objectives, Icons.check_circle_outline),
-        const SizedBox(height: 20),
-        Text('Requirements', style: heading),
-        const SizedBox(height: 8),
-        bullets(content.requirements, Icons.arrow_right_alt),
-        const SizedBox(height: 20),
-        Text('Curriculum · ${content.lessonCount} lessons', style: heading),
-        const SizedBox(height: 8),
-        for (final module in content.modules)
-          Card(
-            margin: const EdgeInsets.only(bottom: 8),
-            child: ExpansionTile(
-              shape: const Border(),
-              title: Text(module.title,
-                  style: theme.textTheme.titleSmall
-                      ?.copyWith(fontWeight: FontWeight.w600)),
-              subtitle: Text('${module.lessons.length} lessons'),
-              children: [
-                for (final lesson in module.lessons)
-                  ListTile(
-                    dense: true,
-                    leading: Icon(
-                      lesson.isPreview
-                          ? Icons.play_circle_outline
-                          : Icons.lock_outline,
-                      color: lesson.isPreview
-                          ? theme.colorScheme.primary
-                          : theme.colorScheme.outline,
-                    ),
-                    title: Text(lesson.title),
-                    trailing: Text(
-                      lesson.isPreview
-                          ? 'Preview · ${lesson.durationMinutes} min'
-                          : '${lesson.durationMinutes} min',
-                      style: theme.textTheme.bodySmall,
-                    ),
-                  ),
-              ],
+        if (content.lessonCount == 0)
+          Padding(
+            padding: const EdgeInsets.symmetric(vertical: 8),
+            child: Text(
+              'No lessons have been added yet.',
+              style: theme.textTheme.bodyMedium
+                  ?.copyWith(color: theme.colorScheme.outline),
             ),
           ),
+        for (final module in content.modules)
+          if (module.lessons.isNotEmpty)
+            Card(
+              margin: const EdgeInsets.only(bottom: 8),
+              child: ExpansionTile(
+                shape: const Border(),
+                initiallyExpanded: content.modules.length == 1,
+                title: Text(
+                  module.title,
+                  style: theme.textTheme.titleSmall
+                      ?.copyWith(fontWeight: FontWeight.w600),
+                ),
+                subtitle: Text(_lessonsLabel(module.lessons.length)),
+                children: [
+                  for (final lesson in module.lessons)
+                    ListTile(
+                      dense: true,
+                      leading: Icon(
+                        lesson.isPreview || enrolled
+                            ? Icons.play_circle_outline
+                            : Icons.lock_outline,
+                        color: lesson.isPreview || enrolled
+                            ? theme.colorScheme.primary
+                            : theme.colorScheme.outline,
+                      ),
+                      title: Text(lesson.title),
+                      trailing: _trailing(theme, lesson),
+                      onTap: () {
+                        if (lesson.isPreview || enrolled) {
+                          context.push(AppRoutes.lesson(courseId, lesson.id));
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text('Enroll to watch this lesson.'),
+                            ),
+                          );
+                        }
+                      },
+                    ),
+                ],
+              ),
+            ),
         const SizedBox(height: 12),
       ],
+    );
+  }
+
+  Widget? _trailing(ThemeData theme, Lesson lesson) {
+    final style = theme.textTheme.bodySmall;
+    final minutes = lesson.durationMinutes;
+    if (minutes == null) {
+      return lesson.isPreview ? Text('Preview', style: style) : null;
+    }
+    return Text(
+      lesson.isPreview ? 'Preview · $minutes min' : '$minutes min',
+      style: style,
     );
   }
 }
