@@ -1,17 +1,32 @@
-# elearning_app
+# E-Learning Mobile App
 
-A new Flutter project.
+A Flutter e-learning app: discover courses, enroll, watch video lessons,
+track progress, write reviews.
 
-## Getting Started
+**Team:** Sunnich, Thearong, Visal, Saran
 
-This project is a starting point for a Flutter application.
+## Features
+- Register, login, session kept across restarts (JWT, secure storage)
+- Browse courses with search, categories and paging
+- Course details: curriculum, ratings and reviews
+- Enrollment and My Learning with progress
+- Lesson player (video, mark complete, next/previous)
+- Profile: edit, change password, light/dark theme
 
-A few resources to get you started if this is your first Flutter project:
+## Tech
+Flutter, Dart, Material 3, Riverpod, GoRouter, Dio, Chewie/video_player,
+Flutter Secure Storage, Hive. Clean Architecture, feature-first.
 
-- [Learn Flutter](https://docs.flutter.dev/get-started/learn-flutter)
-- [Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Flutter learning resources](https://docs.flutter.dev/reference/learning-resources)
+Backend: Spring Boot REST API with JWT and PostgreSQL, hosted on Render
+(Swagger: https://student-management-system-eg8t.onrender.com/swagger-ui/index.html).
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+## Run
+```bash
+flutter pub get
+flutter run -d chrome
+```
+The first request can take about a minute: the free Render server sleeps
+when idle.
+
+## Team workflow
+See [CONTRIBUTING.md](CONTRIBUTING.md) and [TEAM_PLAN.md](TEAM_PLAN.md).
