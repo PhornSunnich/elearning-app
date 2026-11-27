@@ -11,6 +11,7 @@ import '../../domain/entities/course.dart';
 import '../../domain/entities/course_content.dart';
 import '../viewmodels/course_details_viewmodel.dart';
 import '../viewmodels/enrollment_viewmodel.dart';
+import '../widgets/reviews_section.dart';
 
 String _lessonsLabel(int n) => '$n ${n == 1 ? 'lesson' : 'lessons'}';
 
@@ -163,6 +164,9 @@ class _Body extends ConsumerWidget {
             courseId: course.id,
           ),
         ),
+        const SizedBox(height: 24),
+        ReviewsSection(courseId: course.id),
+        const SizedBox(height: 24),
       ],
     );
   }
