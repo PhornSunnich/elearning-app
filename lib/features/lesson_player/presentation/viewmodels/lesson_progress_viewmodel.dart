@@ -21,7 +21,11 @@ final lessonProgressRepositoryProvider =
 final courseProgressProvider =
     FutureProvider.family<CourseProgress, String>((ref, courseId) async {
   final studentId = ref.watch(authViewModelProvider.select((s) => s.user?.id));
-  if (studentId == null) return CourseProgress.empty;
+  final enrolled = ref.watch(enrolledCourseIdsProvider).contains(courseId);
+
+  // No enrollment, no progress: skip the request instead of getting a 404.
+  if (studentId == null || !enrolled) return CourseProgress.empty;
+
   return ref
       .read(lessonProgressRepositoryProvider)
       .getCourseProgress(studentId: studentId, courseId: courseId);

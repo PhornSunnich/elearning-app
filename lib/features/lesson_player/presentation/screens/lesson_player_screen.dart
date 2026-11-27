@@ -181,25 +181,46 @@ class _LessonPlayerScreenState extends ConsumerState<LessonPlayerScreen> {
   }
 }
 
+/// Black 16:9 frame, never taller than 45% of the screen.
+class _PlayerFrame extends StatelessWidget {
+  const _PlayerFrame({required this.child});
+
+  final Widget child;
+
+  @override
+  Widget build(BuildContext context) {
+    final maxHeight = MediaQuery.sizeOf(context).height * 0.45;
+    return Container(
+      width: double.infinity,
+      color: Colors.black,
+      alignment: Alignment.center,
+      child: ConstrainedBox(
+        constraints: BoxConstraints(maxHeight: maxHeight),
+        child: AspectRatio(
+          aspectRatio: 16 / 9,
+          child: Center(child: child),
+        ),
+      ),
+    );
+  }
+}
+
 class _LockedArea extends StatelessWidget {
   const _LockedArea();
 
   @override
   Widget build(BuildContext context) {
-    return AspectRatio(
-      aspectRatio: 16 / 9,
-      child: Container(
-        color: Colors.black,
-        alignment: Alignment.center,
-        child: const Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(Icons.lock_outline, color: Colors.white70, size: 40),
-            SizedBox(height: 8),
-            Text('Enroll in this course to watch',
-                style: TextStyle(color: Colors.white70)),
-          ],
-        ),
+    return const _PlayerFrame(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.lock_outline, color: Colors.white70, size: 40),
+          SizedBox(height: 8),
+          Text(
+            'Enroll in this course to watch',
+            style: TextStyle(color: Colors.white70),
+          ),
+        ],
       ),
     );
   }
@@ -271,13 +292,14 @@ class _VideoAreaState extends State<_VideoArea> {
       child = Chewie(controller: _chewie!);
     }
 
-    return AspectRatio(
-      aspectRatio: 16 / 9,
-      child: Container(
-        color: Colors.black,
-        alignment: Alignment.center,
-        child: child,
-      ),
-    );
+    return _PlayerFrame(child: child);
+  //   return AspectRatio(
+  //     aspectRatio: 16 / 9,
+  //     child: Container(
+  //       color: Colors.black,
+  //       alignment: Alignment.center,
+  //       child: child,
+  //     ),
+  //   );
   }
 }
