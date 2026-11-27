@@ -100,6 +100,10 @@ class FakeAuthRepository implements AuthRepository {
     }
     account.password = newPassword;
   }
+
+  @override
+  Future<void> updateCachedUser(AppUser user) => _local.saveUser(user);
+
 }
 
 class _Account {

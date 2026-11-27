@@ -20,6 +20,8 @@ import '../../features/auth/presentation/screens/forgot_password_screen.dart';
 import '../../features/auth/presentation/screens/reset_password_screen.dart';
 import '../../features/auth/presentation/viewmodels/auth_viewmodel.dart';
 import '../../features/lesson_player/presentation/screens/lesson_player_screen.dart';
+import '../../features/profile/presentation/screens/change_password_screen.dart';
+import '../../features/profile/presentation/screens/edit_profile_screen.dart';
 
 /// GoRouter re-runs `redirect` whenever this notifies.
 class _RouterRefresh extends ChangeNotifier {
@@ -150,6 +152,24 @@ final routerProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: AppRoutes.profile,
                 builder: (context, state) => const ProfileScreen(),
+              ),
+            ],
+          ),
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.profile,
+                builder: (context, state) => const ProfileScreen(),
+                routes: [
+                  GoRoute(
+                    path: 'edit',
+                    builder: (context, state) => const EditProfileScreen(),
+                  ),
+                  GoRoute(
+                    path: 'password',
+                    builder: (context, state) => const ChangePasswordScreen(),
+                  ),
+                ],
               ),
             ],
           ),

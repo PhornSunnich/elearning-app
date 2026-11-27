@@ -14,6 +14,9 @@ class AppRoutes {
   static const myLearning = '/my-learning';
   static const notifications = '/notifications';
   static const profile = '/profile';
+  static const profileEdit = '/profile/edit';
+  static const profilePassword = '/profile/password';
+  
 
   static String courseDetails(String id) => '/explore/course/$id';
 
@@ -22,5 +25,5 @@ class AppRoutes {
 
   static String lesson(String courseId, String lessonId) =>
       '/explore/course/$courseId/lesson/$lessonId';
-  
+
 }
