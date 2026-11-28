@@ -15,11 +15,11 @@ class CourseRemoteDataSource {
   }) async {
     final res = await _dio.get(
       '/api/courses',
-      queryParameters: {
+            queryParameters: {
         'page': page,
         'size': size,
         if (search != null && search.isNotEmpty) 'search': search,
-        ?categoryId: categoryId,
+        'categoryId': ?categoryId,
       },
     );
     return PagedCoursesModel.fromJson(res.data!);
